@@ -22,6 +22,7 @@ library(xtable)
 library(caret)
 library(rpart)
 library(nnet)
+set.seed(495)
 ```
 
 # Introduction
@@ -60,7 +61,7 @@ train %>%
   count(Sex,Survived, wt = NULL, sort=FALSE)
 ```
 
-We see that around 74% of women survived while abour 81% of men survived. However, we also need to consider age. For the purpose of our analysis we will consider passengers under 18 as children. To get a better picture, we could look at the age and gender of those that survived or died.
+We see that around 74% of women survived while about 19% of men survived. However, we also need to consider age. For the purpose of our analysis we will consider passengers under 18 as children. To get a better picture, we could look at the age and gender of those that survived or died.
 
 ```{r, comment=FALSE, warning=FALSE, message=FALSE}
 #Generating histograms displaying Age, Sex, and Survived.

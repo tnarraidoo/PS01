@@ -389,7 +389,7 @@ train %&gt;%
 ## 2 female        1   233
 ## 3   male        0   468
 ## 4   male        1   109</code></pre>
-<p>We see that around 74% of women survived while abour 81% of men survived. However, we also need to consider age. For the purpose of our analysis we will consider passengers under 18 as children. To get a better picture, we could look at the age and gender of those that survived or died.</p>
+<p>We see that around 74% of women survived while about 19% of men survived. However, we also need to consider age. For the purpose of our analysis we will consider passengers under 18 as children. To get a better picture, we could look at the age and gender of those that survived or died.</p>
 <pre class="r"><code>#Generating histograms displaying Age, Sex, and Survived.
 ggplot(train, aes(Age, fill = factor(Survived))) + 
   geom_histogram() + 
@@ -437,8 +437,7 @@ train &lt;- train %&gt;%
 table(train$Survived_train_pred,train$Survived)</code></pre>
 <pre><code>##    
 ##       0   1
-##   0  81 233
-##   1 468 109</code></pre>
+##   1 549 342</code></pre>
 <p>From our first model, we see we are able to correctly predict those that died in 83% of cases and those that survived in 74% of cases using the train set.</p>
 <pre class="r"><code>#extract PassengerId and Survived variables for submission.
 pred1 &lt;- pred1 %&gt;%
@@ -451,18 +450,18 @@ pred1 &lt;- pred1 %&gt;%
 <pre class="r"><code>#Building our second model using nnet for neural network modeling using our assumptions.
 m2 &lt;- nnet(Survived ~ Sex + Age, data = train, size = 2,linout = FALSE)</code></pre>
 <pre><code>## # weights:  9
-## initial  value 188.835150 
-## iter  10 value 161.201484
-## iter  20 value 116.797751
-## iter  30 value 116.278739
-## iter  40 value 116.155469
-## iter  50 value 116.016679
-## iter  60 value 115.982930
-## iter  70 value 115.975311
-## iter  80 value 115.972410
-## iter  90 value 115.968063
-## iter 100 value 115.944935
-## final  value 115.944935 
+## initial  value 173.412408 
+## iter  10 value 167.571385
+## iter  20 value 131.990954
+## iter  30 value 122.851839
+## iter  40 value 117.854496
+## iter  50 value 117.781714
+## iter  60 value 117.727638
+## iter  70 value 117.722253
+## iter  80 value 117.710984
+## iter  90 value 117.705811
+## iter 100 value 117.693575
+## final  value 117.693575 
 ## stopped after 100 iterations</code></pre>
 <pre class="r"><code>test$Survived &lt;- predict(m2, test)
 #making our prediction.
@@ -478,8 +477,8 @@ train &lt;- train %&gt;%
 table(train$Survived_train_pred,train$Survived)</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 477 130
-##   1  72 212</code></pre>
+##   0 483 137
+##   1  66 205</code></pre>
 <p>Using the train set again to compare accuracy, we see that we are correctly identifying those who died in 88% of cases and those that survived in 62% of cases.</p>
 </div>
 </div>
