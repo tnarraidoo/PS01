@@ -141,6 +141,6 @@ table(train$Survived_train_pred,train$Survived)
 
 Using the train set again to compare accuracy, we see that we are correctly identifying those who died in 88% of cases and those that survived in 62% of cases.
 
-#Conclusion
+# Conclusion
 
 On submitting our results, the second model yielded a score of around 0.78 while the first one a score of around .68. Using age and gender, while it being a simple model, does a decent job at predicting survival as they fare better than a 0.5 baseline.

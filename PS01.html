@@ -437,8 +437,8 @@ train &lt;- train %&gt;%
 table(train$Survived_train_pred,train$Survived)</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 454  90
-##   1  95 252</code></pre>
+##   0  81 233
+##   1 468 109</code></pre>
 <p>From our first model, we see we are able to correctly predict those that died in 83% of cases and those that survived in 74% of cases using the train set.</p>
 <pre class="r"><code>#extract PassengerId and Survived variables for submission.
 pred1 &lt;- pred1 %&gt;%
@@ -451,18 +451,18 @@ pred1 &lt;- pred1 %&gt;%
 <pre class="r"><code>#Building our second model using nnet for neural network modeling using our assumptions.
 m2 &lt;- nnet(Survived ~ Sex + Age, data = train, size = 2,linout = FALSE)</code></pre>
 <pre><code>## # weights:  9
-## initial  value 175.896521 
-## iter  10 value 160.093536
-## iter  20 value 117.117243
-## iter  30 value 116.318844
-## iter  40 value 116.104245
-## iter  50 value 116.036395
-## iter  60 value 116.000807
-## iter  70 value 115.981836
-## iter  80 value 115.973419
-## iter  90 value 115.964075
-## iter 100 value 115.931448
-## final  value 115.931448 
+## initial  value 188.835150 
+## iter  10 value 161.201484
+## iter  20 value 116.797751
+## iter  30 value 116.278739
+## iter  40 value 116.155469
+## iter  50 value 116.016679
+## iter  60 value 115.982930
+## iter  70 value 115.975311
+## iter  80 value 115.972410
+## iter  90 value 115.968063
+## iter 100 value 115.944935
+## final  value 115.944935 
 ## stopped after 100 iterations</code></pre>
 <pre class="r"><code>test$Survived &lt;- predict(m2, test)
 #making our prediction.
