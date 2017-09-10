@@ -22,7 +22,9 @@ library(xtable)
 library(caret)
 library(rpart)
 library(nnet)
-set.seed(495)
+library(htmlTable)
+# set seed for consistent output
+set.seed(495) 
 ```
 
 # Introduction
@@ -88,56 +90,51 @@ Since we believe gender was a major factor, we look at the survival ratios based
 
 ```{r}
 #Comparing Survived by gender.
-table(train$Survived, train$Sex)
+print(table(train$Survived, train$Sex))
 ```
 
 We see for female, around 75% survived while for male, around 80% died. Our first model will randomly assign whether a female survived or not based on the survival ratio and for all male below 10, we say they survived. The remaining observations are randomly assigned a survival value based on male survival proportion. Males whose age was not recorded are assumed to be adults. We will then look at our accuracy level by applying our assumption on the train set.
 
-## simple model
+## a) simple model
 
 ```{r}
 #create a model by first making two list to reflect survival proportion of each gender and proceed by assigning whether an obserbation survived using our assumptions.
 x <- c(0,0,0,0,1) #male survival proportion
 y <- c(1,1,1,0) #female survival proportion
 pred1 <- test %>%
-  mutate(Survived = ifelse(Sex=="female", sample(y,1),ifelse(!is.na(Age) & Age <= 10,1,sample(x,1)))) 
-
-#Apply our model on the train set to look at error rates.
-train <- train %>%
-  mutate(Survived_train_pred = ifelse(Sex=="female", sample(y,1),ifelse(!is.na(Age) & Age <= 10,1,sample(x,1)))) 
-
-table(train$Survived_train_pred,train$Survived)
-```
-
-From our first model, we see we are able to correctly predict those that died in 83% of cases and those that survived in 74% of cases using the train set.
-
-```{r}
-#extract PassengerId and Survived variables for submission.
-pred1 <- pred1 %>%
-    select(PassengerId,Survived)
+  mutate(Survived = ifelse(Sex=="female", sample(y,1),ifelse(!is.na(Age) & Age <= 10,1,sample(x,1)))) %>%
+  select(PassengerId,Survived)
+#writing the results in a submission csv file.
 #write_csv(pred1,"submission.csv")
 ```
 
-## neural network model
+When I first submitted this model, I got a score of around .68 on Kaggle. To improve my score, I next turned to neural network.
+
+## b) neural network model
 
 We will now look at a neural network model using Age and Sex as our variables. Here if the chance of survival is greater or equal to 0.5, we assume the passenger survived. We then look at the accuracy level using the train set.
 
-```{r}
+```{r, results='hide'}
 #Building our second model using nnet for neural network modeling using our assumptions.
 m2 <- nnet(Survived ~ Sex + Age, data = train, size = 2,linout = FALSE)
-test$Survived <- predict(m2, test)
+```
+
+```{r}
 #making our prediction.
+test$Survived <- predict(m2, test)
+#If Survived >=0.5, assign 1, else assign 0 and select PassengerID and Survived for submission.
 pred2 <- test %>%
   mutate(Survived = ifelse(!is.na(Survived) & Survived>=0.5,1,0)) %>%
   select(PassengerId,Survived)
+#writing the results in a submission csv file.
 write_csv(pred2,"submission.csv")
 
 #Using the train set for error rate comparison.
 train$Survived_train_pred <- predict(m2, train)
 train <- train %>%
   mutate(Survived_train_pred = ifelse(!is.na(Survived_train_pred) & Survived_train_pred>=0.5,1,0)) 
-table(train$Survived_train_pred,train$Survived)
-
+#print confusion matrix.
+print(table(train$Survived_train_pred,train$Survived))
 ```
 
 Using the train set again to compare accuracy, we see that we are correctly identifying those who died in 88% of cases and those that survived in 62% of cases.
