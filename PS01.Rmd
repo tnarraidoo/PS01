@@ -48,7 +48,8 @@ Variable <- c("PassengerId","Survived", "Pclass","Name", "Sex","Age","SibSp"," P
 
 Description <- c("Unique Identification Number of each passenger","Whether passenger survived(1) or died(0)","Passenger's class","Name of passenger","sex of passenger","Age of passenger","Number of sibblings and/or spouses with them","Number of parents and/or children with them","Passenger's ticket number","Fare","Cabin","Port of Embarkation")
 
-f3 <- as.data.frame(cbind(Variable,Description))
+Input_Type <- c("Number", "0,1", "Number","Character","'male' or 'female'", "Number", "Number","Number","Character", "Number","Character", "'C','Q','S'")
+f3 <- as.data.frame(cbind(Variable,Description, Input_Type))
 print(xtable(f3,caption = "Variable Description"), caption.placement = 'top',comment=F, type="html")
 ```
 
