@@ -1,21 +1,145 @@
 ---
-title: "STAT/MATH 495: Problem Set 01"
-author: "WRITE YOUR NAME HERE"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+title: 'STAT/MATH 495: Problem Set 01'
+author: "Tasheena Narraidoo"
+date: '2017-09-07'
 output:
   html_document:
-    toc: true
-    toc_float: true
+    collapsed: no
+    smooth_scroll: no
+    toc: yes
     toc_depth: 2
-    collapsed: false
-    smooth_scroll: false
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=4.5)
-
 # Load packages
 library(tidyverse)
+library(xtable)
+library(caret)
+library(rpart)
+library(nnet)
 ```
 
+# Introduction
+The goal is to build a model that would predict who survived/died amongst the passengers of the Titanic. The Titanic: 'Machine Learning from Disaster' data from Kaggle is used here. 
 
+# Getting the Data
+
+```{r, include=FALSE}
+#load training set 
+train <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/train.csv")
+#load test set
+test <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/test.csv")
+
+```
+
+The training set has 12 variables including who survived and we have a 891 observations.
+Our test has the same variables as our training set except for the 'Survived' variable. Our test set has 418 observations.
+```{r, echo=FALSE, results='asis', comment=FALSE}
+# create a table for variable description.
+Variable <- c("PassengerId","Survived", "Pclass","Name", "Sex","Age","SibSp"," Parch"," Ticket","Fare","Cabin","Embarked")
+
+Description <- c("Unique Identification Number of each passenger","Whether passenger survived(1) or died(0)","Passenger's class","Name of passenger","sex of passenger","Age of passenger","Number of sibblings and/or spouses with them","Number of parents and/or children with them","Passenger's ticket number","Fare","Cabin","Port of Embarkation")
+
+f3 <- as.data.frame(cbind(Variable,Description))
+print(xtable(f3,caption = "Variable Description"), caption.placement = 'top',comment=F, type="html")
+```
+
+We now proceed by exploring our training data set.
+
+#Exploratory Data Analysis
+
+We first look at the gender distribution of those that survived, which would yield a simple model.
+```{r}
+#Tallying gender and Survived.
+train %>%
+  count(Sex,Survived, wt = NULL, sort=FALSE)
+```
+
+We see that around 74% of women survived while abour 81% of men survived. However, we also need to consider age. For the purpose of our analysis we will consider passengers under 18 as children. To get a better picture, we could look at the age and gender of those that survived or died.
+
+```{r, comment=FALSE, warning=FALSE, message=FALSE}
+#Generating histograms displaying Age, Sex, and Survived.
+ggplot(train, aes(Age, fill = factor(Survived))) + 
+  geom_histogram() + 
+  facet_grid(.~Sex)
+```
+
+The above histograms would suggest that for female, gender would have a higher impact than age in terms of survival while age played an important factor for males, especially those below 10. This makes sense because in case of emergencies, priority is given to women and children.
+
+We then look at how being a child or an adult affected Survived.
+```{r, warning=FALSE}
+#Creating a new variable isChild to denote whether passenger was a child or an adult.
+train %>%
+  mutate(isChild = ifelse(Age<18, "Children", "Adult")) %>%
+  count(isChild,Survived, wt = NULL, sort=FALSE)
+```
+
+We see that 54% of children survived but only 38% of adults survived if we omit missing data for age. We now proceed to make our prediction model.
+
+#Making Prediction 
+
+Since we believe gender was a major factor, we look at the survival ratios based on gender.
+
+```{r}
+#Comparing Survived by gender.
+table(train$Survived, train$Sex)
+```
+
+We see for female, around 75% survived while for male, around 80% died. Our first model will randomly assign whether a female survived or not based on the survival ratio and for all male below 10, we say they survived. The remaining observations are randomly assigned a survival value based on male survival proportion. Males whose age was not recorded are assumed to be adults. We will then look at our accuracy level by applying our assumption on the train set.
+
+## simple model
+
+```{r}
+#create a model by first making two list to reflect survival proportion of each gender and proceed by assigning whether an obserbation survived using our assumptions.
+x <- c(0,0,0,0,1) #male survival proportion
+y <- c(1,1,1,0) #female survival proportion
+pred1 <- test %>%
+  mutate(Survived = ifelse(Sex=="female", sample(y,1),ifelse(!is.na(Age) & Age <= 10,1,sample(x,1)))) 
+
+#Apply our model on the train set to look at error rates.
+train <- train %>%
+  mutate(Survived_train_pred = ifelse(Sex=="female", sample(y,1),ifelse(!is.na(Age) & Age <= 10,1,sample(x,1)))) 
+
+table(train$Survived_train_pred,train$Survived)
+```
+
+From our first model, we see we are able to correctly predict those that died in 83% of cases and those that survived in 74% of cases using the train set.
+
+```{r}
+#extract PassengerId and Survived variables for submission.
+pred1 <- pred1 %>%
+    select(PassengerId,Survived)
+#write_csv(pred1,"submission.csv")
+```
+
+## neural network model
+
+We will now look at a neural network model using Age and Sex as our variables. Here if the chance of survival is greater or equal to 0.5, we assume the passenger survived. We then look at the accuracy level using the train set.
+
+```{r}
+#Building our second model using nnet for neural network modeling using our assumptions.
+m2 <- nnet(Survived ~ Sex + Age, data = train, size = 2,linout = FALSE)
+test$Survived <- predict(m2, test)
+#making our prediction.
+pred2 <- test %>%
+  mutate(Survived = ifelse(!is.na(Survived) & Survived>=0.5,1,0)) %>%
+  select(PassengerId,Survived)
+write_csv(pred2,"submission.csv")
+
+#Using the train set for error rate comparison.
+train$Survived_train_pred <- predict(m2, train)
+train <- train %>%
+  mutate(Survived_train_pred = ifelse(!is.na(Survived_train_pred) & Survived_train_pred>=0.5,1,0)) 
+table(train$Survived_train_pred,train$Survived)
+
+```
+
+Using the train set again to compare accuracy, we see that we are correctly identifying those who died in 88% of cases and those that survived in 62% of cases.
+
+#Conclusion
+On submitting our results, the second model yielded a score of around 0.78 while the first one a score of around .68. Using age and gender, while it being a simple model, does a decent job at predicting survival as they fare better than a 0.5 baseline.
