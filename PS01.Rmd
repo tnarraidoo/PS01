@@ -55,7 +55,7 @@ print(xtable(f3,caption = "Variable Description"), caption.placement = 'top',com
 
 We now proceed by exploring our training data set.
 
-#Exploratory Data Analysis
+# Exploratory Data Analysis
 
 We first look at the gender distribution of those that survived, which would yield a simple model.
 ```{r}
@@ -85,7 +85,7 @@ train %>%
 
 We see that 54% of children survived but only 38% of adults survived if we omit missing data for age. We now proceed to make our prediction model.
 
-#Making Prediction 
+# Making Prediction 
 
 Since we believe gender was a major factor, we look at the survival ratios based on gender.
 
