@@ -55,7 +55,7 @@ print(xtable(f3,caption = "Variable Description"), caption.placement = 'top',com
 
 We now proceed by exploring our training data set.
 
-#Exploratory Data Analysis
+# Exploratory Data Analysis
 
 We first look at the gender distribution of those that survived, which would yield a simple model.
 ```{r}
@@ -85,7 +85,7 @@ train %>%
 
 We see that 54% of children survived but only 38% of adults survived if we omit missing data for age. We now proceed to make our prediction model.
 
-#Making Prediction 
+# Making Prediction 
 
 Since we believe gender was a major factor, we look at the survival ratios based on gender.
 
@@ -94,7 +94,7 @@ Since we believe gender was a major factor, we look at the survival ratios based
 print(table(train$Survived, train$Sex))
 ```
 
-We see for female, around 75% survived while for male, around 80% died. Our first model will randomly assign whether a female survived or not based on the survival ratio and for all male below 10, we say they survived. The remaining observations are randomly assigned a survival value based on male survival proportion. Males whose age was not recorded are assumed to be adults. We will then look at our accuracy level by applying our assumption on the train set.
+We see for female, around 75% survived while for male, around 80% died. Our first model will randomly assign whether a female survived or not based on the survival ratio and for all male below 10, we say they survived. The remaining observations are randomly assigned a survival value based on male survival proportion. Males with no recorded age are assumed to be adults. 
 
 ## a) simple model
 
